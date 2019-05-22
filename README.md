@@ -3,6 +3,7 @@
 > X stands for "extended"
 
 ![Premature alpha](https://img.shields.io/badge/v-0.1.0-blueviolet.svg)
+[![Build Status](https://travis-ci.com/FilipMalczak/fusionaut-x.svg?branch=master)](https://travis-ci.com/FilipMalczak/fusionaut-x)
 
 > Make sure to read "FusionAuth licensing" section
 
