@@ -2,7 +2,7 @@ language: "java"
 
 before_install:
   - ./gradlew clean
-  - source ./docker-login.sh
+  - source ./scripts/docker-login.sh
 
 install:
   - ./gradlew build
