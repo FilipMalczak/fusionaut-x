@@ -1,6 +1,12 @@
-language:       java
-before_install: ./gradlew clean
-install:        ./gradlew build
-script: docker build . -t filipmalczak/fusionauth-x:1.6.1
-before_deploy: docker login -u "$DOCKERHUB_USERNAME" -p "$DOCKERHUB_PASSWORD"
-deploy: docker push filipmalczak/fusionauth-x:1.6.1
+language: "java"
+
+before_install:
+  - "./gradlew clean"
+  - "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD"
+
+install:
+  - "./gradlew build"
+  - "docker build . -t filipmalczak/fusionauth-x:1.6.1"
+
+script:
+  - "docker push filipmalczak/fusionauth-x:1.6.1"
