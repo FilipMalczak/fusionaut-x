@@ -29,7 +29,7 @@ task prepareFaLibs(dependsOn: downloadFaJar, type: Copy) {
 
 compileJava.dependsOn prepareFaLibs
 
-version = '0.0.1-SNAPSHOT'
+version = "${fusionAuthVersion}-SNAPSHOT"
 group = "com.github.filipmalczak"
 
 dependencies {
