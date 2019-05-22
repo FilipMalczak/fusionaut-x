@@ -2,7 +2,7 @@ language: "java"
 
 before_install:
   - "./gradlew clean"
-  - "docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD"
+  - docker login -u $DOCKERHUB_USERNAME -p $DOCKERHUB_PASSWORD
 
 install:
   - "./gradlew build"
