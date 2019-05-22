@@ -1,5 +1,5 @@
 language:       java
 before_install: ./gradlew clean
 install:        ./gradlew build
-script: docker build .
+script: docker build . -t filipmalczak/fusionauth-x:1.6.1
 after_success: docker push filipmalczak/fusionauth-x:1.6.1
