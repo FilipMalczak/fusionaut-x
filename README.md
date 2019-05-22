@@ -1,4 +1,4 @@
-#FusionAuth-x
+#FusionAuth-Xx
 
 > X stands for "extended"
 
@@ -8,6 +8,8 @@
 > Make sure to read "FusionAuth licensing" section
 
 ## What is this?
+
+> TL;DR - see **bold** down there 🡫
 
 So, don't get me wrong. FusionAuth is not my product. It's a wonderful product,
  but all the praises belong to the [creators](https://fusionauth.io).
@@ -25,14 +27,15 @@ Lately I've been in love with containerization and found FA really useful.
 smoothly. I wouldn't make an OS project for commercial thing that I would
 not personally recommend.
 
-This repository (and it's dockerhub counterpart) is a solution to that issue. 
- It is a base for a `filipmalczak/fusionauth-x` Docker image that is based off
- a `fusionauth/fusionauth-app` one (with the same tag).
+This repository (and it's 
+[dockerhub counterpart](https://hub.docker.com/r/filipmalczak/fusionauth-x)) is a
+ solution to that issue. **It is a base for a `filipmalczak/fusionauth-x` 
+ Docker image that is based off a `fusionauth/fusionauth-app` one (with the same tag).**
  
 **This layer does not change anything - it just adds a FA plugin to the image;
- that plugin analyses some env vars and performs this manual actions automatically.**
+ that plugin analyses some env vars and performs these manual actions automatically.**
  
- ## How to configure
+ ## How to use
  
  > I'll write this down soon. It evolves too fast at this point.
  
@@ -41,7 +44,11 @@ This repository (and it's dockerhub counterpart) is a solution to that issue.
  > This is really important. Focus.
  
  Consider that a legal notice, that using anything that the 
- [attached licence](./LICENSE) refers to "Work" or "Derivative Works" is
+ [attached licence](./LICENSE) refers to as "Work" or "Derivative Works" is
  equivalent with agreeing to license terms that would otherwise occur in the
  manual process of initializing FusionAuth instance.
  
+ > TODO
+ > - fill the README
+ > - manage versions in build, travis and README badge (probably somewhere else)
+ > - refactor BootstrapImpl to two steps
