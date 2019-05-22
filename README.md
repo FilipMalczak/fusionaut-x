@@ -1,4 +1,4 @@
-#FusionAuth-Xx
+# FusionAuth-X
 
 > X stands for "extended"
 
