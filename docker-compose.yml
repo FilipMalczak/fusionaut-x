@@ -1,0 +1,58 @@
+version: '3'
+
+services:
+  db:
+    image: "postgres:9.6"
+    environment:
+      PGDATA: /var/lib/postgresql/data/pgdata
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: pass
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    volumes:
+    - "db_data:/var/lib/postgresql/data"
+
+  search:
+    image: "docker.elastic.co/elasticsearch/elasticsearch:6.3.1"
+    environment:
+      cluster.name: fusionauth
+      bootstrap.memory_lock: "true"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    restart: unless-stopped
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+    - "es_data:/usr/share/elasticsearch/data"
+
+  fusionauth:
+    build: .
+    depends_on:
+      - db
+      - search
+    environment:
+      DATABASE_URL: jdbc:postgresql://db:5432/fusionauth
+      DATABASE_ROOT_USER: user
+      DATABASE_ROOT_PASSWORD: pass
+      DATABASE_USER: user
+      DATABASE_PASSWORD: pass
+      FUSIONAUTH_SEARCH_SERVERS: http://search:9200
+      FUSIONAUTH_URL: http://fusionauth:9011
+      FUSIONAUTH_HOME: /usr/local/fusionauth
+      FUSIONAUTH_BOOTSTRAP_API_KEY: qwerty1234568
+      FUSIONAUTH_BOOTSTRAP_EXISTING_KEY_STRATEGY: UPDATE
+      FUSIONAUTH_BOOTSTRAP_IGNORE_ADMIN_MISSING: "true"
+    volumes:
+    - "fa_config:/usr/local/fusionauth/config"
+    ports:
+      - "9011:9011"
+
+
+volumes:
+  db_data:
+  es_data:
+  fa_config:
