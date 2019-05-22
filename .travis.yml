@@ -1,14 +1,15 @@
 language: "java"
 
 before_install:
-  - "./gradlew clean"
-  - "./docker-login.sh"
+  - ./gradlew clean
+  - source ./docker-login.sh
 
 install:
-  - "./gradlew build"
-  - "docker build . -t filipmalczak/fusionauth-x:1.6.1"
+  - ./gradlew build
+  - source ./scripts/docker-build.sh
 
 script:
-  - "docker push filipmalczak/fusionauth-x:1.6.1"
+  - source ./scripts/docker-push.sh
 
-after_script: "docker logout"
+after_script:
+  - docker logout

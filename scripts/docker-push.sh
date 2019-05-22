@@ -1,0 +1,1 @@
+docker push $DOCKERHUB_USERNAME/fusionauth-x:1.6.1
