@@ -12,10 +12,15 @@ import io.fusionauth.domain.UserRegistration;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.*;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.Executors;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -37,7 +42,9 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
     private static final String IGNORE_ADMIN_MISSING_ENVVAR = ENVVAR_PREFIX+"IGNORE_ADMIN_MISSING";
 
     @Inject
-    public FusionAuthBootstrapImpl(AuthenticationKeyMapper authenticationKeyMapper, UserMapper userMapper, ApplicationMapper applicationMapper){
+    public FusionAuthBootstrapImpl(AuthenticationKeyMapper authenticationKeyMapper,
+                                   UserMapper userMapper,
+                                   ApplicationMapper applicationMapper){
         try {
             bootstrapApiKey(authenticationKeyMapper);
             bootstrapAdmin(userMapper, applicationMapper);
@@ -167,9 +174,9 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
 
     private void add(UserMapper userMapper, AdminDetails adminDetails, Application application){
         log.info("Creating new admin account");
-        userMapper.create(
-            new User(
-                null,
+        UUID uuid = UUID.randomUUID();
+        User admin = new User(
+                uuid,
                 adminDetails.email, adminDetails.username, adminDetails.password,
                 null, null, null,
                 adminDetails.firstName, null, adminDetails.lastName,
@@ -180,15 +187,21 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
                 ContentStatus.ACTIVE,
                 null, false, null, null,
                 new UserRegistration(
-                    null,
-                    application.id,
-                    null, null,
-                    adminDetails.username, ContentStatus.ACTIVE,
-                    null, null, null,
-                    "admin"
+                        null,
+                        application.id,
+                        uuid, null,
+                        adminDetails.username, ContentStatus.ACTIVE,
+                        null, null, Collections.emptyList(),
+                        "admin"
                 )
-            )
         );
+        admin.insertInstant = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        admin.tenantId = application.tenantId;
+        userMapper.create(
+                admin
+        );
+
+
     }
 
     private void replace(UserMapper userMapper, List<User> existing, AdminDetails adminDetails, Application application){
