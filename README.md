@@ -69,7 +69,8 @@ This repository (and it's
  > - registering and admin in two separate calls (`User` and `UserRegistration`) is creating both data in db.
  > - the differeneces between a user registered by bootstrap and a user registered manually with the setup wizard are: 1. there is no relation between the admin role and the userRegistration. (table: `user_registrations_application_roles`). 2. the user created manually is present in the table `identities`. 3. the user created by bootstrap is not visible in FA panel.
  > - i've tried to add the relation role-user_registration manually in db - did not help.
- > - i didnt find any mapper to map a `UserRegistration` to a `Role`
+ 
+ > UPDATE - I've added calls to identity and roles, still not working. We are missing some mechanism creating a user in FA
  
  > Questions
  > - are tou sure that first and last name is not needed ? when filling the form manually the field is required
