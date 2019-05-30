@@ -4,18 +4,18 @@ import com.google.inject.Inject;
 import com.inversoft.authentication.api.domain.AuthenticationKey;
 import com.inversoft.authentication.api.domain.AuthenticationKeyMapper;
 import io.fusionauth.api.domain.ApplicationMapper;
+import io.fusionauth.api.domain.UserIdentityStatus;
 import io.fusionauth.api.domain.UserMapper;
-import io.fusionauth.domain.Application;
-import io.fusionauth.domain.ContentStatus;
-import io.fusionauth.domain.User;
-import io.fusionauth.domain.UserRegistration;
+import io.fusionauth.domain.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.*;
 import java.util.concurrent.Executors;
 
-import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 
 @Slf4j
@@ -37,7 +37,9 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
     private static final String IGNORE_ADMIN_MISSING_ENVVAR = ENVVAR_PREFIX+"IGNORE_ADMIN_MISSING";
 
     @Inject
-    public FusionAuthBootstrapImpl(AuthenticationKeyMapper authenticationKeyMapper, UserMapper userMapper, ApplicationMapper applicationMapper){
+    public FusionAuthBootstrapImpl(AuthenticationKeyMapper authenticationKeyMapper,
+                                   UserMapper userMapper,
+                                   ApplicationMapper applicationMapper){
         try {
             bootstrapApiKey(authenticationKeyMapper);
             bootstrapAdmin(userMapper, applicationMapper);
@@ -167,28 +169,63 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
 
     private void add(UserMapper userMapper, AdminDetails adminDetails, Application application){
         log.info("Creating new admin account");
-        userMapper.create(
-            new User(
-                null,
-                adminDetails.email, adminDetails.username, adminDetails.password,
-                null, null, null,
-                adminDetails.firstName, null, adminDetails.lastName,
-                null, null,
-                true, null, null,
-                Collections.singletonMap(BOOTSTRAPPED_KEY_ATTRIBUTE, true),
-                true,
-                ContentStatus.ACTIVE,
-                null, false, null, null,
-                new UserRegistration(
-                    null,
-                    application.id,
-                    null, null,
-                    adminDetails.username, ContentStatus.ACTIVE,
-                    null, null, null,
-                    "admin"
-                )
-            )
+        UUID adminUuid = UUID.randomUUID();
+        UUID registrationUuid = UUID.randomUUID();
+
+        //create user
+        User admin = new User(
+            adminUuid,
+            adminDetails.email, adminDetails.username, adminDetails.password,
+            null, null, null,
+            adminDetails.firstName, null, adminDetails.lastName,
+            null, null,
+            true, null, null,
+            Collections.singletonMap(BOOTSTRAPPED_KEY_ATTRIBUTE, true),
+            true,
+            ContentStatus.ACTIVE,
+            null, false, null, null
         );
+
+        admin.insertInstant = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        admin.tenantId = application.tenantId;
+
+        userMapper.create(
+            admin
+        );
+
+        //this is ugly
+        admin.encryptionScheme = "salted-pbkdf2-hmac-sha256";
+        admin.factor = 24000;
+        admin.passwordLastUpdateInstant = ZonedDateTime.now();
+        admin.salt = "otI22vF/BsHriFqkkoZMjZVyCM9007AD37EhlUgYQF8=";
+        admin.tenantId = application.tenantId;
+        admin.twoFactorDelivery = TwoFactorDelivery.None;
+        admin.twoFactorEnabled = false;
+
+        //create identity
+        userMapper.createIdentity(admin, UserIdentityStatus.Active);
+
+        //create UserRegistration
+        UserRegistration registration = new UserRegistration(
+            registrationUuid,
+            application.id,
+            adminUuid, null,
+            adminDetails.username, ContentStatus.ACTIVE,
+            null, null, Collections.singletonList(Locale.ENGLISH), //fixme locale shit
+            "admin"
+        );
+        registration.insertInstant = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        userMapper.createRegistration(registration);
+
+        //add roles to userRegistration
+        List<ApplicationRole> newRoles =
+                application.roles.stream()
+                        .filter(r -> r.name.equalsIgnoreCase("admin"))
+                        .collect(toList());
+
+
+        userMapper.addRolesToUserRegistration(registrationUuid, newRoles);
+
     }
 
     private void replace(UserMapper userMapper, List<User> existing, AdminDetails adminDetails, Application application){

@@ -46,11 +46,15 @@ services:
       FUSIONAUTH_BOOTSTRAP_API_KEY: qwerty1234568
       FUSIONAUTH_BOOTSTRAP_EXISTING_KEY_STRATEGY: UPDATE
       FUSIONAUTH_BOOTSTRAP_IGNORE_ADMIN_MISSING: "true"
+      FUSIONAUTH_BOOTSTRAP_EXISTING_ADMIN_STRATEGY: ADD
+      FUSIONAUTH_BOOTSTRAP_ADMIN_EMAIL: fusionauth-x@yopmail.com
+      FUSIONAUTH_BOOTSTRAP_ADMIN_USERNAME: admin
+      FUSIONAUTH_BOOTSTRAP_ADMIN_PASSWORD: password1234
+
     volumes:
     - "fa_config:/usr/local/fusionauth/config"
     ports:
       - "9011:9011"
-
 
 volumes:
   db_data:
