@@ -15,10 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.Instant;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.Executors;
 
 import static java.util.stream.Collectors.toList;
@@ -174,33 +171,36 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
 
     private void add(UserMapper userMapper, AdminDetails adminDetails, Application application){
         log.info("Creating new admin account");
-        UUID uuid = UUID.randomUUID();
+        UUID adminUuid = UUID.randomUUID();
+        UUID registrationUuid = UUID.randomUUID();
         User admin = new User(
-                uuid,
-                adminDetails.email, adminDetails.username, adminDetails.password,
-                null, null, null,
-                adminDetails.firstName, null, adminDetails.lastName,
-                null, null,
-                true, null, null,
-                Collections.singletonMap(BOOTSTRAPPED_KEY_ATTRIBUTE, true),
-                true,
-                ContentStatus.ACTIVE,
-                null, false, null, null,
-                new UserRegistration(
-                        null,
-                        application.id,
-                        uuid, null,
-                        adminDetails.username, ContentStatus.ACTIVE,
-                        null, null, Collections.emptyList(),
-                        "admin"
-                )
+            adminUuid,
+            adminDetails.email, adminDetails.username, adminDetails.password,
+            null, null, null,
+            adminDetails.firstName, null, adminDetails.lastName,
+            null, null,
+            true, null, null,
+            Collections.singletonMap(BOOTSTRAPPED_KEY_ATTRIBUTE, true),
+            true,
+            ContentStatus.ACTIVE,
+            null, false, null, null
         );
         admin.insertInstant = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         admin.tenantId = application.tenantId;
         userMapper.create(
-                admin
+            admin
         );
 
+        UserRegistration registration = new UserRegistration(
+            registrationUuid,
+            application.id,
+            adminUuid, null,
+            adminDetails.username, ContentStatus.ACTIVE,
+            null, null, Collections.singletonList(Locale.ENGLISH), //fixme locale shit
+            "admin"
+        );
+        registration.insertInstant = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
+        userMapper.createRegistration(registration);
 
     }
 
