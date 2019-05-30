@@ -4,11 +4,9 @@ import com.google.inject.Inject;
 import com.inversoft.authentication.api.domain.AuthenticationKey;
 import com.inversoft.authentication.api.domain.AuthenticationKeyMapper;
 import io.fusionauth.api.domain.ApplicationMapper;
+import io.fusionauth.api.domain.UserIdentityStatus;
 import io.fusionauth.api.domain.UserMapper;
-import io.fusionauth.domain.Application;
-import io.fusionauth.domain.ContentStatus;
-import io.fusionauth.domain.User;
-import io.fusionauth.domain.UserRegistration;
+import io.fusionauth.domain.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -173,6 +171,8 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
         log.info("Creating new admin account");
         UUID adminUuid = UUID.randomUUID();
         UUID registrationUuid = UUID.randomUUID();
+
+        //create user
         User admin = new User(
             adminUuid,
             adminDetails.email, adminDetails.username, adminDetails.password,
@@ -185,12 +185,27 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
             ContentStatus.ACTIVE,
             null, false, null, null
         );
+
         admin.insertInstant = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         admin.tenantId = application.tenantId;
+
         userMapper.create(
             admin
         );
 
+        //this is ugly
+        admin.encryptionScheme = "salted-pbkdf2-hmac-sha256";
+        admin.factor = 24000;
+        admin.passwordLastUpdateInstant = ZonedDateTime.now();
+        admin.salt = "otI22vF/BsHriFqkkoZMjZVyCM9007AD37EhlUgYQF8=";
+        admin.tenantId = application.tenantId;
+        admin.twoFactorDelivery = TwoFactorDelivery.None;
+        admin.twoFactorEnabled = false;
+
+        //create identity
+        userMapper.createIdentity(admin, UserIdentityStatus.Active);
+
+        //create UserRegistration
         UserRegistration registration = new UserRegistration(
             registrationUuid,
             application.id,
@@ -201,6 +216,15 @@ public class FusionAuthBootstrapImpl implements FusionAuthBootstrap {
         );
         registration.insertInstant = ZonedDateTime.ofInstant(Instant.now(), ZoneId.systemDefault());
         userMapper.createRegistration(registration);
+
+        //add roles to userRegistration
+        List<ApplicationRole> newRoles =
+                application.roles.stream()
+                        .filter(r -> r.name.equalsIgnoreCase("admin"))
+                        .collect(toList());
+
+
+        userMapper.addRolesToUserRegistration(registrationUuid, newRoles);
 
     }
 
