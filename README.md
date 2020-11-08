@@ -1,5 +1,13 @@
 # FusionAuth-X
 
+This project was created quite some time ago to ease usage of FusionAuth in containerized multi-service environments (e.g. with docker-compose or k8s). At the time of creation, there was no way to initialize Docker instance of FA with API key and some initial users and roles.
+
+Fortunately, creators of FusionAuth recognized the need for such functionality and they now provide [FusionAuth Kickstart](https://fusionauth.io/docs/v1/tech/installation-guide/kickstart/). If this project seemed useful to you, please migrate to FA Kickstart.
+
+**This repository is not maintained anymore.**
+
+## Outdated
+
 > X stands for "extended"
 
 ![Premature alpha](https://img.shields.io/badge/v-0.1.0-blueviolet.svg)
@@ -7,7 +15,7 @@
 
 > Make sure to read "FusionAuth licensing" section
 
-## What is this?
+### What is this?
 
 > TL;DR - see **bold** down there 🡫
 
@@ -39,7 +47,7 @@ This repository (and it's
  
  > I'll write this down soon. It evolves too fast at this point.
  
- ## FusionAuth licensing
+ ### FusionAuth licensing
  
  > This is really important. Focus.
  
